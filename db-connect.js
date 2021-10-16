@@ -1,10 +1,11 @@
-require('dotenv').config();
-const { Pool } = require('pg');
+import pg from 'pg';
+import dotenv from 'dotenv';
+
+const { Pool } = pg;
+dotenv.config();
 
 const pool = new Pool();
 
-module.exports = {
-  async query(text, parameters) {
-    return pool.query(text, parameters);
-  },
-};
+export default async function query(text, parameters) {
+  return pool.query(text, parameters);
+}
