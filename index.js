@@ -9,6 +9,7 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+app.use(express.json());
 app.use('/entity', entity);
 app.use('/set', set);
 
