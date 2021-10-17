@@ -8,4 +8,9 @@ router.get('/', (req, res) => {
     .then((queryResult) => res.json(queryResult.rows));
 });
 
+router.get('/:id', (req, res) => {
+  query('SELECT * FROM set WHERE id = $1', [req.params.id])
+    .then((queryResult) => res.json(queryResult.rows[0]));
+});
+
 export default router;
