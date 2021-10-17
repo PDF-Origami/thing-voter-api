@@ -13,6 +13,4 @@ app.use(express.json());
 app.use('/entity', entity);
 app.use('/set', set);
 
-app.listen(port, () => {
-  console.log(`App listening at http://localhost:${port}`);
-});
+app.listen(port);
