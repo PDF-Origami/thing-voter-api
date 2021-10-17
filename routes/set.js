@@ -10,7 +10,12 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   query('SELECT * FROM set WHERE id = $1', [req.params.id])
-    .then((queryResult) => res.json(queryResult.rows[0]));
+    .then((queryResult) => {
+      if (queryResult.rowCount === 0) {
+        res.status(404).json({ error: 'Set not found.' });
+      }
+      res.json(queryResult.rows[0]);
+    });
 });
 
 export default router;
