@@ -1,10 +1,9 @@
-import pg from 'pg';
 import dotenv from 'dotenv';
+import pg from 'pg';
 
-const { Pool } = pg;
 dotenv.config();
 
-const pool = new Pool();
+const pool = new pg.Pool();
 
 export default async function query(text, parameters) {
   return pool.query(text, parameters);
