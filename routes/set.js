@@ -49,13 +49,31 @@ router.get('/:set_id', (req, res) => {
 router.route('/:set_id/entities')
   .get((req, res) => {
     query(
-      `SELECT entity.*, set_entity.score
-      FROM entity INNER JOIN set_entity 
-      ON entity.id = set_entity.entity_id
-      WHERE set_entity.set_id = $1`,
+      `SELECT e.*, a.name AS action_name, s_e_a.score
+      FROM entity e INNER JOIN set_entity s_e
+      ON e.id = s_e.entity_id
+      INNER JOIN set_entity_action s_e_a
+      ON e.id = s_e_a.entity_id
+      INNER JOIN action a
+      ON s_e_a.action_id = a.id
+      WHERE s_e.set_id = $1`,
       [req.params.set_id],
     ).then((queryResult) => {
-      res.json(queryResult.rows);
+      const entities = []
+      for (const row of queryResult.rows) {
+        if (entities.map(entity => entity.id).includes(row.id)) {
+          // Add the action and its score to .scores
+          const entity = entities.find(entity => entity.id === row.id);
+          entity.scores[row.action_name] = row.score;
+        } else {
+          // Add .scores and delete unnecessary keys
+          row.scores = { [row.action_name]: row.score }
+          delete row.score;
+          delete row.action_name;
+          entities.push(row);
+        }
+      };
+      res.json(entities);
     });
   });
 
