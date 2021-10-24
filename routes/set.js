@@ -61,9 +61,17 @@ router.route('/:set_id/entities')
 
 router.route('/:set_id/entities/:entity_id')
   .put((req, res) => {
-    query('INSERT INTO set_contains_entity VALUES ($1, $2)', [req.params.set_id, req.params.entity_id])
+    query(
+      `INSERT INTO set_contains_entity
+      VALUES ($1, $2)
+      ON CONFLICT ON CONSTRAINT set_contains_entity_pkey
+      DO NOTHING`,
+      [req.params.set_id, req.params.entity_id])
       .then(() => res.status(201).end())
-      .catch(() => res.status(400).end());
+      .catch((error) => {
+        res.status(400).end();
+        console.log(error);
+      });
   })
   .delete((req, res) => {
     query('DELETE FROM set_contains_entity WHERE set_id = $1 AND entity_id = $2', [req.params.set_id, req.params.entity_id])
