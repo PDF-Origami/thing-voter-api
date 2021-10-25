@@ -67,9 +67,38 @@ async function getEntities(req, res, next) {
   }
 }
 
+async function addEntity(req, res, next) {
+  try {
+    await query(
+      `INSERT INTO set_entity
+      VALUES ($1, $2)
+      ON CONFLICT ON CONSTRAINT set_entity_pkey
+      DO NOTHING`,
+      [req.params.set_id, req.params.entity_id],
+    );
+    res.status(201).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function removeEntity(req, res, next) {
+  try {
+    await query(
+      'DELETE FROM set_entity WHERE set_id = $1 AND entity_id = $2',
+      [req.params.set_id, req.params.entity_id],
+    );
+    res.status(200).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   getAll,
   getOne,
   createOne,
   getEntities,
+  addEntity,
+  removeEntity,
 };

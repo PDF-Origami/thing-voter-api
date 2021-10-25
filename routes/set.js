@@ -41,25 +41,8 @@ router.route('/:set_id/entities')
   .get(setController.getEntities);
 
 router.route('/:set_id/entities/:entity_id')
-  .put((req, res, next) => {
-    query(
-      `INSERT INTO set_entity
-      VALUES ($1, $2)
-      ON CONFLICT ON CONSTRAINT set_entity_pkey
-      DO NOTHING`,
-      [req.params.set_id, req.params.entity_id])
-      .then(() => res.status(201).end())
-      .catch(error => {
-        // res.status(400).end();
-        next('Error lol');
-        // console.log(error);
-      });
-  })
-  .delete((req, res) => {
-    query('DELETE FROM set_entity WHERE set_id = $1 AND entity_id = $2', [req.params.set_id, req.params.entity_id])
-      .then(() => res.status(204).end())
-      .catch(() => res.status(400).end());
-  });
+  .put(setController.addEntity)
+  .delete(setController.removeEntity);
 
 router.post('/:set_id/entities/:entity_id/vote', (req, res) => {
   query(
