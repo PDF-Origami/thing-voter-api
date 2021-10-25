@@ -15,6 +15,9 @@ async function getOne(req, res, next) {
       'SELECT * FROM set WHERE id = $1',
       [req.params.set_id],
     );
+    if (queryResult.rows.length === 0) {
+      res.status(404).json({ error: 'Set not found' });
+    }
     res.status(200).json(queryResult.rows[0]);
   } catch (error) {
     next(error);
