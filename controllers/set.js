@@ -52,7 +52,7 @@ async function getEntities(req, res, next) {
     );
 
     const entities = queryResult.rows.filter((row, index) => (
-      queryResult.rows.findIndex(gfy => gfy.id === row.id) === index
+      queryResult.rows.findIndex(r => r.id === row.id) === index
     ));
 
     queryResult.rows.map(row => {
