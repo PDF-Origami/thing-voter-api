@@ -12,5 +12,6 @@ module.exports = {
   },
   rules: {
     'import/extensions': 'off',
+    'arrow-parens': ['error', 'as-needed'],
   },
 };
