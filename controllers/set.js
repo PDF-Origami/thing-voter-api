@@ -102,6 +102,21 @@ async function removeEntity(req, res, next) {
   }
 }
 
+async function getActions(req, res, next) {
+  try {
+    const queryResult = await query(
+      `SELECT action.* FROM action
+      INNER JOIN set_action
+      ON action.id = set_action.action_id
+      WHERE set_id = $1`,
+      [req.params.set_id],
+    );
+    res.status(200).json(queryResult.rows);
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function addAction(req, res, next) {
   try {
     await query(
@@ -150,6 +165,7 @@ export default {
   getEntities,
   addEntity,
   removeEntity,
+  getActions,
   addAction,
   removeAction,
   vote,

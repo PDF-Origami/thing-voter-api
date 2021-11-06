@@ -10,6 +10,9 @@ router.route('/')
 router.route('/:set_id')
   .get(setController.getOne);
 
+router.route('/:set_id/actions')
+  .get(setController.getActions);
+
 router.route('/:set_id/entities')
   .get(setController.getEntities);
 
