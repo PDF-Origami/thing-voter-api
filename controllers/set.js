@@ -39,7 +39,7 @@ async function createOne(req, res, next) {
 async function getEntities(req, res, next) {
   try {
     const queryResult = await query(
-      `SELECT e.*, a.name AS action_name, s_e_a.score
+      `SELECT e.*, a.name AS action_name, s_e_a.score, s_e_a.action_id
       FROM entity e
       INNER JOIN set_entity_action s_e_a
       ON e.id = s_e_a.entity_id
@@ -55,12 +55,17 @@ async function getEntities(req, res, next) {
 
     queryResult.rows.map(row => {
       const entity = entities.find(e => e.id === row.id);
-      if (!('scores' in entity)) {
-        entity.scores = {};
+      if (!('actions' in entity)) {
+        entity.actions = [];
       }
-      entity.scores[row.action_name] = row.score;
-      delete entity.score;
+      entity.actions.push({
+        id: row.action_id,
+        name: row.action_name,
+        score: row.score,
+      });
+      delete entity.action_id;
       delete entity.action_name;
+      delete entity.score;
       return entity;
     });
 
