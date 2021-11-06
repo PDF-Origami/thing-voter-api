@@ -41,13 +41,11 @@ async function getEntities(req, res, next) {
     const queryResult = await query(
       `SELECT e.*, a.name AS action_name, s_e_a.score
       FROM entity e
-      INNER JOIN set_entity s_e
-      ON e.id = s_e.entity_id
       INNER JOIN set_entity_action s_e_a
       ON e.id = s_e_a.entity_id
       INNER JOIN action a
       ON s_e_a.action_id = a.id
-      WHERE s_e.set_id = $1`,
+      WHERE s_e_a.set_id = $1`,
       [req.params.set_id],
     );
 
@@ -61,6 +59,8 @@ async function getEntities(req, res, next) {
         entity.scores = {};
       }
       entity.scores[row.action_name] = row.score;
+      delete entity.score;
+      delete entity.action_name;
       return entity;
     });
 
@@ -124,6 +124,20 @@ async function removeAction(req, res, next) {
   }
 }
 
+async function vote(req, res, next) {
+  try {
+    await query(
+      `UPDATE set_entity_action
+      SET score = score + 1
+      WHERE set_id = $1 AND entity_id = $2 AND action_id = $3`,
+      [req.params.set_id, req.params.entity_id, req.params.action_id],
+    );
+    res.status(200).end();
+  } catch (error) {
+    next(error);
+  }
+}
+
 export default {
   getAll,
   getOne,
@@ -133,4 +147,5 @@ export default {
   removeEntity,
   addAction,
   removeAction,
+  vote,
 };
