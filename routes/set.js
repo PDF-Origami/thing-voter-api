@@ -1,34 +1,8 @@
 import { Router } from 'express';
 import setController from '../controllers/set.js';
-import query from '../db-connect.js';
+import { query } from '../db-connect.js';
 
 const router = Router();
-
-router.param('set_id', (req, res, next, id) => {
-  query('SELECT * FROM set WHERE id = $1', [id])
-    .then(queryResult => {
-      if (queryResult.rowCount === 0) {
-        res.sendStatus(404);
-      } else {
-        [req.set] = queryResult.rows;
-        next();
-      }
-    })
-    .catch(() => next(new Error('Failed to find set')));
-});
-
-router.param('entity_id', (req, res, next, id) => {
-  query('SELECT * FROM entity WHERE id = $1', [id])
-    .then(queryResult => {
-      if (queryResult.rowCount === 0) {
-        res.sendStatus(404);
-      } else {
-        [req.entity] = queryResult.rows;
-        next();
-      }
-    })
-    .catch(() => next(new Error('Failed to find entity')));
-});
 
 router.route('/')
   .get(setController.getAll)

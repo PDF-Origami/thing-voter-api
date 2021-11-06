@@ -1,4 +1,4 @@
-import query from '../db-connect.js';
+import { query, transaction } from '../db-connect.js';
 
 async function getAll(req, res, next) {
   try {
