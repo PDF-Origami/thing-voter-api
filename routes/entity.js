@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { query } from '../db-connect.js';
+import { db, QueryResultError } from '../utils/db.js';
 
 const router = Router();
 
+/*
 router.get('/', (req, res) => {
   query('SELECT * FROM entity')
     .then(queryResult => res.json(queryResult.rows));
@@ -17,5 +18,6 @@ router.get('/:id', (req, res) => {
       res.json(queryResult.rows[0]);
     });
 });
+*/
 
 export default router;

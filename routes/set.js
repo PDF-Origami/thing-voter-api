@@ -10,9 +10,6 @@ router.route('/')
 router.route('/:set_id')
   .get(setController.getOne);
 
-router.route('/:set_id/actions')
-  .get(setController.getActions);
-
 router.route('/:set_id/entities')
   .get(setController.getEntities);
 
@@ -22,5 +19,12 @@ router.route('/:set_id/entities/:entity_id')
 
 router.route('/:set_id/entities/:entity_id/vote/:action_id')
   .put(setController.vote);
+
+router.route('/:set_id/actions')
+  .get(setController.getActions);
+
+router.route('/:set_id/actions/:action_id')
+  .put(setController.addAction)
+  .delete(setController.removeAction);
 
 export default router;
