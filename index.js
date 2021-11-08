@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.json());
-app.use('/entity', entityRoutes);
-app.use('/set', setRoutes);
+app.use('/entities', entityRoutes);
+app.use('/sets', setRoutes);
 
 app.listen(port);
