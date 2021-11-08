@@ -3,6 +3,10 @@ import setController from '../controllers/set.js';
 
 const router = Router();
 
+router.param('set_id', setController.validateParameter);
+router.param('entity_id', setController.validateParameter);
+router.param('action_id', setController.validateParameter);
+
 router.route('/')
   .get(setController.getAll)
   .post(setController.createOne);

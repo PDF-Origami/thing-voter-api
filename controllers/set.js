@@ -2,6 +2,25 @@ import { db, QueryResultError } from '../utils/db.js';
 
 // Todo: factor out common code in addEntity, addAction, removeEntity, removeAction
 
+// Check that the thing (set, entity or action) with the given id exists,
+// then cache it in req
+async function validateParameter(req, res, next, id, parameter) {
+  const table = parameter.slice(0, -3);
+  try {
+    req[table] = await db.one(
+      'SELECT * FROM $1:name WHERE id = $2',
+      [table, id],
+    );
+    next();
+  } catch (error) {
+    if (error instanceof QueryResultError) {
+      res.status(404).json({ error: `${table} not found` });
+    } else {
+      next(error);
+    }
+  }
+}
+
 async function getAll(req, res, next) {
   try {
     const sets = await db.any('SELECT * FROM set');
@@ -13,18 +32,9 @@ async function getAll(req, res, next) {
 
 async function getOne(req, res, next) {
   try {
-    const set = await db.one(
-      'SELECT * FROM set WHERE id = $1',
-      [req.params.set_id],
-    );
-
-    res.status(200).json(set);
+    res.status(200).json(req.set);
   } catch (error) {
-    if (error instanceof QueryResultError) {
-      res.status(404).json({ error: 'Set not found' });
-    } else {
-      next(error);
-    }
+    next(error);
   }
 }
 
@@ -53,7 +63,7 @@ async function getEntities(req, res, next) {
         INNER JOIN set_entity s_e
         ON e.id = s_e.entity_id
         WHERE s_e.set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
       );
 
       const actions = await t.any(
@@ -61,13 +71,13 @@ async function getEntities(req, res, next) {
         INNER JOIN set_action s_a
         ON a.id = s_a.action_id
         WHERE s_a.set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
       );
 
       const combinations = await t.any(
         `SELECT * FROM set_entity_action
         WHERE set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
       );
       /**
        * Copy the entity object and add an actions sub-object.
@@ -101,7 +111,7 @@ async function addEntity(req, res, next) {
         VALUES ($1, $2)
         ON CONFLICT ON CONSTRAINT set_entity_pkey
         DO NOTHING RETURNING *`,
-        [req.params.set_id, req.params.entity_id],
+        [req.set.id, req.entity.id],
       );
 
       // If entity was already in set, stop
@@ -113,7 +123,7 @@ async function addEntity(req, res, next) {
         `SELECT action_id
         FROM set_action
         WHERE set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
         setAction => setAction.action_id,
       );
 
@@ -121,7 +131,7 @@ async function addEntity(req, res, next) {
         await t.none(
           `INSERT INTO set_entity_action
           VALUES ($1, $2, $3)`,
-          [req.params.set_id, req.params.entity_id, action.action_id],
+          [req.set.id, req.entity.id, action.action_id],
         );
       });
     });
@@ -138,14 +148,14 @@ async function removeEntity(req, res, next) {
       await t.none(
         `DELETE FROM set_entity
         WHERE set_id = $1 AND entity_id = $2`,
-        [req.params.set_id, req.params.entity_id],
+        [req.set.id, req.entity.id],
       );
 
       const setActions = await t.any(
         `SELECT action_id
         FROM set_action
         WHERE set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
         setAction => setAction.action_id,
       );
 
@@ -153,7 +163,7 @@ async function removeEntity(req, res, next) {
         await t.none(
           `DELETE FROM set_entity_action
           WHERE set_id = $1 AND entity_id = $2 AND action_id = $3`,
-          [req.params.set_id, req.params.entity_id, action.action_id],
+          [req.set.id, req.entity.id, action.action_id],
         );
       });
     });
@@ -170,7 +180,7 @@ async function getActions(req, res, next) {
       INNER JOIN set_action
       ON action.id = set_action.action_id
       WHERE set_id = $1`,
-      [req.params.set_id],
+      [req.set.id],
     );
     res.status(200).json(actions);
   } catch (error) {
@@ -186,7 +196,7 @@ async function addAction(req, res, next) {
         VALUES ($1, $2)
         ON CONFLICT ON CONSTRAINT set_action_pkey
         DO NOTHING RETURNING *`,
-        [req.params.set_id, req.params.action_id],
+        [req.set.id, req.action.id],
       );
 
       // If action was already in set, stop
@@ -198,7 +208,7 @@ async function addAction(req, res, next) {
         `SELECT entity_id
         FROM set_entity
         WHERE set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
         setEntity => setEntity.entity_id,
       );
 
@@ -206,7 +216,7 @@ async function addAction(req, res, next) {
         await t.none(
           `INSERT INTO set_entity_action
           VALUES ($1, $2, $3)`,
-          [req.params.set_id, entity.entity_id, req.params.action_id],
+          [req.set.id, entity.entity_id, req.action.id],
         );
       });
     });
@@ -223,14 +233,14 @@ async function removeAction(req, res, next) {
       await t.none(
         `DELETE FROM set_action
         WHERE set_id = $1 AND action_id = $2`,
-        [req.params.set_id, req.params.action_id],
+        [req.set.id, req.action.id],
       );
 
       const setEntities = await t.any(
         `SELECT entity_id
         FROM set_entity
         WHERE set_id = $1`,
-        [req.params.set_id],
+        [req.set.id],
         setEntity => setEntity.entity_id,
       );
 
@@ -238,7 +248,7 @@ async function removeAction(req, res, next) {
         await t.none(
           `DELETE FROM set_entity_action
           WHERE set_id = $1 AND entity_id = $2 AND action_id = $3`,
-          [req.params.set_id, entity.entity_id, req.params.action_id],
+          [req.set.id, entity.entity_id, req.action.id],
         );
       });
     });
@@ -255,19 +265,16 @@ async function vote(req, res, next) {
       SET score = score + 1
       WHERE set_id = $1 AND entity_id = $2 AND action_id = $3
       RETURNING set_id`,
-      [req.params.set_id, req.params.entity_id, req.params.action_id],
+      [req.set.id, req.entity.id, req.action.id],
     );
     res.status(200).end();
   } catch (error) {
-    if (error instanceof QueryResultError) {
-      res.status(404).json({ error: '(set, entity, action) combination not found' });
-    } else {
-      next(error);
-    }
+    next(error);
   }
 }
 
 export default {
+  validateParameter,
   getAll,
   getOne,
   createOne,
