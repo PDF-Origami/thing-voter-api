@@ -1,23 +1,15 @@
 import { Router } from 'express';
-import { db, QueryResultError } from '../utils/db.js';
+import * as entityController from '../controllers/entity.js';
+import { validateParameter } from '../utils/controllers.js';
 
 const router = Router();
 
-/*
-router.get('/', (req, res) => {
-  query('SELECT * FROM entity')
-    .then(queryResult => res.json(queryResult.rows));
-});
+router.param('entity_id', validateParameter);
 
-router.get('/:id', (req, res) => {
-  query('SELECT * FROM entity WHERE id = $1', [req.params.id])
-    .then(queryResult => {
-      if (queryResult.rowCount === 0) {
-        res.status(404).json({ error: 'Entity not found.' });
-      }
-      res.json(queryResult.rows[0]);
-    });
-});
-*/
+router.route('/')
+  .get(entityController.getAll);
+
+router.route('/:entity_id')
+  .get(entityController.getOne);
 
 export default router;

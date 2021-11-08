@@ -1,11 +1,12 @@
 import { Router } from 'express';
 import setController from '../controllers/set.js';
+import { validateParameter } from '../utils/controllers.js';
 
 const router = Router();
 
-router.param('set_id', setController.validateParameter);
-router.param('entity_id', setController.validateParameter);
-router.param('action_id', setController.validateParameter);
+router.param('set_id', validateParameter);
+router.param('entity_id', validateParameter);
+router.param('action_id', validateParameter);
 
 router.route('/')
   .get(setController.getAll)
