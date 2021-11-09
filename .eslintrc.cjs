@@ -13,5 +13,6 @@ module.exports = {
     'import/extensions': 'off',
     'arrow-parens': ['error', 'as-needed'],
     'no-unused-vars': ['error', { argsIgnorePattern: 'next' }],
+    'import/prefer-default-export': 'off',
   },
 };
