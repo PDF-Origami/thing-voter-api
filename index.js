@@ -10,6 +10,7 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.json());
+// TODO: create generic controller implementing shared functions?
 app.use('/entities', entityRoutes);
 app.use('/sets', setRoutes);
 

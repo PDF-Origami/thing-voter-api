@@ -7,7 +7,8 @@ const router = Router();
 router.param('entity_id', validateParameter);
 
 router.route('/')
-  .get(entityController.getAll);
+  .get(entityController.getAll)
+  .post(entityController.createOne);
 
 router.route('/:entity_id')
   .get(entityController.getOne);
