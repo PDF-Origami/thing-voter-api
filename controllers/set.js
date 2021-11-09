@@ -21,6 +21,10 @@ async function getOne(req, res, next) {
 
 async function createOne(req, res, next) {
   try {
+    if (req.body.name === undefined) {
+      res.status(400).json({ error: 'No name specified' });
+      return;
+    }
     await db.none(
       'INSERT INTO set (name, description) VALUES ($1, $2)',
       [req.body.name, req.body.description],
@@ -132,6 +136,8 @@ async function removeEntity(req, res, next) {
         [req.set.id, req.entity.id],
       );
 
+      // TODO: fix third argument - it doesn't do anything
+      // Remember to remove .action_id from the forEach below afterwards
       const setActions = await t.any(
         `SELECT action_id
         FROM set_action
