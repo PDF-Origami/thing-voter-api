@@ -15,5 +15,8 @@ app.use(express.json());
 app.use('/sets', setRoutes);
 app.use('/entities', entityRoutes);
 app.use('/actions', actionroutes);
+app.use((err, req, res, next) => {
+  res.status(500).send({ error: 'Internal server error' });
+});
 
 app.listen(port);
