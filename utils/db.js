@@ -1,19 +1,19 @@
-import dotenv from 'dotenv';
 import pgPromise from 'pg-promise';
 
-dotenv.config();
 const pgp = pgPromise();
 
-export const db = pgp({
+const db = pgp({
   password: process.env.PGPASSWORD,
 });
 
+// Verify connection
 db.connect()
   .then(obj => {
     obj.done(); // success, release connection;
   })
-  .catch(() => {
-    console.log('Unable to connect to DB');
+  .catch(e => {
+    console.log('Unable to connect to DB:', e);
   });
 
+export { db };
 export const { QueryResultError } = pgp.errors;
