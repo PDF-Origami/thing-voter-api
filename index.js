@@ -1,5 +1,5 @@
 import express from 'express';
-import './loadenv.js';
+import './utils/loadenv.js';
 import setRoutes from './routes/set.js';
 import entityRoutes from './routes/entity.js';
 import actionroutes from './routes/action.js';

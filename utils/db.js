@@ -10,6 +10,7 @@ const db = pgp({
 db.connect()
   .then(obj => {
     obj.done(); // success, release connection;
+    console.log('Connected to DB');
   })
   .catch(e => {
     console.log('Unable to connect to DB:', e);
